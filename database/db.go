@@ -1,7 +1,6 @@
 package database
 
 import (
-	"ToDoProject/models"
 	"fmt"
 	"log"
 	"os"
@@ -26,8 +25,6 @@ func ConnectDatabase() {
 	if err != nil {
 		log.Fatal("Failed to connect to database: ", err)
 	}
-
-	db.AutoMigrate(&models.Todo{}, &models.User{})
 
 	DB = db
 }
