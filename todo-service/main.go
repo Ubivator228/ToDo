@@ -2,8 +2,8 @@ package main
 
 import (
 	"ToDoProject/config"
-	"ToDoProject/database"
-	"ToDoProject/routes"
+	"ToDoProject/todo-service/routes"
+	"ToDoProject/user-service/database"
 	"github.com/gin-gonic/gin"
 )
 
