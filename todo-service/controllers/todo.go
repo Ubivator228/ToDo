@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"ToDoProject/database"
-	"ToDoProject/models"
+	"ToDoProject/todo-service/database"
+	"ToDoProject/todo-service/models"
 	"net/http"
 	"strconv"
 

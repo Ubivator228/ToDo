@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"ToDoProject/database"
-	"ToDoProject/models"
+	"ToDoProject/user-service/database"
+	"ToDoProject/user-service/models"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
