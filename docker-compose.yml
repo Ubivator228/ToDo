@@ -1,82 +1,30 @@
-version: "3.9"
+version: '3.8'
 
 services:
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Dockerfile.frontend
     ports:
-      - "3000:3000"
+      - "5173:5173"
     environment:
-      - VITE_API_URL=http://user-service:8081
-      - VITE_TODO_API=http://todo-service:8082
+      - VITE_API_URL=http://backend:8081
+      - VITE_TODO_API=http://backend:8082
     depends_on:
-      - user-service
-      - todo-service
+      - backend
     networks:
-      - backend-network
+      - app-network
 
-  user-service:
+  backend:
     build:
-      context: ./user-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Dockerfile.backend
     ports:
       - "8081:8081"
-    environment:
-      - DB_HOST=postgres
-      - DB_USER=postgres
-      - DB_PASSWORD=BULOCHNIK228
-      - DB_NAME=todo
-      - DB_PORT=5432
-      - JWT_SECRET=your_jwt_secret_here
-    volumes:
-      - ./user-service/.env:/app/.env
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - backend-network
-
-  todo-service:
-    build:
-      context: ./todo-service
-      dockerfile: Dockerfile
-    ports:
       - "8082:8082"
-    environment:
-      - DB_HOST=postgres
-      - DB_USER=postgres
-      - DB_PASSWORD=BULOCHNIK228
-      - DB_NAME=todo
-      - DB_PORT=5432
-      - JWT_SECRET=your_jwt_secret_here
-    volumes:
-      - ./todo-service/.env:/app/.env
-    depends_on:
-      postgres:
-        condition: service_healthy
     networks:
-      - backend-network
-
-  postgres:
-    image: postgres:15
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: BULOCHNIK228
-      POSTGRES_DB: todo
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d todo"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-    networks:
-      - backend-network
+      - app-network
 
 networks:
-  backend-network:
+  app-network:
     driver: bridge
-
-volumes:
-  pgdata:

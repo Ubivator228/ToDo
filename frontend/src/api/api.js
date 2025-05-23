@@ -103,5 +103,13 @@ export const todoAPI = {
             handleError(error, "Toggle todo error");
         }
     }
-
 };
+
+// Явные экспорты для удобства
+export const register = authAPI.register;
+export const login = authAPI.login;
+export const getCurrentUser = authAPI.getCurrentUser;
+export const getTodos = todoAPI.getAll;
+export const addTodo = todoAPI.create;
+export const deleteTodo = todoAPI.delete;
+export const toggleTodo = todoAPI.toggle;

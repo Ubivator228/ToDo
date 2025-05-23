@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { todoAPI } from '../api/api';
+import { getTodos, addTodo, deleteTodo, toggleTodo } from '../api/api';
 import { getToken } from '../utils/token';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,7 +11,7 @@ const TodoList = () => {
     useEffect(() => {
         const fetchTodos = async () => {
             try {
-                const data = await todoAPI.getAll();
+                const data = await getTodos();
                 setTodos(data);
             } catch (err) {
                 navigate('/login');
@@ -27,20 +27,20 @@ const TodoList = () => {
 
     const handleAdd = async () => {
         if (!newTitle.trim()) return;
-        const added = await todoAPI.create(newTitle);
+        const added = await addTodo(newTitle); // Изменено с {title: newTitle} на просто newTitle
         setTodos([...todos, added]);
         setNewTitle('');
     };
 
     const handleToggle = async (id) => {
-        await todoAPI.toggle(id);
+        await toggleTodo(id);
         setTodos(todos.map(todo => (
             todo.id === id ? { ...todo, completed: !todo.completed } : todo
         )));
     };
 
     const handleDelete = async (id) => {
-        await todoAPI.delete(id);
+        await deleteTodo(id);
         setTodos(todos.filter(todo => todo.id !== id));
     };
 

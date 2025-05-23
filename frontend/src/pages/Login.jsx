@@ -1,25 +1,39 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import { login } from '../api/api';
+import { useNavigate } from 'react-router-dom';
 
 const Login = ({ onLogin }) => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [credentials, setCredentials] = useState({
+        username: '',  // Изменено с email на username для соответствия API
+        password: ''
+    });
     const [error, setError] = useState('');
+    const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:8081/login', {
-                email,
-                password,
+            // Используем функцию login из api.js
+            const response = await login({
+                username: credentials.username,
+                password: credentials.password
             });
 
-            const token = response.data.token;
+            const token = response.token;  // Получаем токен из ответа
             localStorage.setItem('token', token);
-            onLogin(token);
+            if (onLogin) onLogin(token);
+            navigate('/todos');  // Перенаправляем на страницу задач
         } catch (err) {
-            setError('Неверный email или пароль');
+            setError('Неверное имя пользователя или пароль');
+            console.error('Login error:', err);
         }
+    };
+
+    const handleChange = (e) => {
+        setCredentials({
+            ...credentials,
+            [e.target.name]: e.target.value
+        });
     };
 
     return (
@@ -28,19 +42,21 @@ const Login = ({ onLogin }) => {
             {error && <p className="text-red-500 mb-2 text-sm">{error}</p>}
             <form onSubmit={handleLogin} className="space-y-4">
                 <input
-                    type="email"
-                    placeholder="Email"
+                    type="text"
+                    name="username"
+                    placeholder="Имя пользователя"
                     className="w-full px-4 py-2 border rounded-lg"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={credentials.username}
+                    onChange={handleChange}
                     required
                 />
                 <input
                     type="password"
+                    name="password"
                     placeholder="Пароль"
                     className="w-full px-4 py-2 border rounded-lg"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    value={credentials.password}
+                    onChange={handleChange}
                     required
                 />
                 <button
