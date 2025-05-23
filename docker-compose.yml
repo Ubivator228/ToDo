@@ -1,6 +1,20 @@
 version: "3.9"
 
 services:
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - user-service
+      - todo-service
+    restart: always
+
+
+
   user-service:
     build:
       context: ./user-service
@@ -10,12 +24,14 @@ services:
     environment:
       - DB_HOST=postgres
       - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - DB_NAME=userdb
+      - DB_PASSWORD=BULOCHNIK228
+      - DB_NAME=todo
       - DB_PORT=5432
       - JWT_SECRET=your_jwt_secret
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+    restart: always
 
   todo-service:
     build:
@@ -26,22 +42,30 @@ services:
     environment:
       - DB_HOST=postgres
       - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - DB_NAME=tododb
+      - DB_PASSWORD=BULOCHNIK228
+      - DB_NAME=todo
       - DB_PORT=5432
       - JWT_SECRET=your_jwt_secret
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+    restart: always
 
   postgres:
     image: postgres:15
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: BULOCHNIK228
+      POSTGRES_DB: todo
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   pgdata:
