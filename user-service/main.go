@@ -4,39 +4,36 @@ import (
 	"ToDoProject/user-service/config"
 	"ToDoProject/user-service/database"
 	"ToDoProject/user-service/routes"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"net/http"
+	"time"
 )
 
 func main() {
 	config.LoadEnv()
 	database.ConnectDatabase()
 
-	r := gin.Default()
+	router := gin.Default()
 
-	// Подключаем маршруты из routes.SetupRoutes
-	routes.SetupRoutes(r)
+	// CORS Configuration
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "Accept"},
+		ExposeHeaders:    []string{"Content-Length", "Authorization"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
-	// Дополнительный тестовый маршрут (опционально)
-	r.GET("/user", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "User service is working!",
-		})
+	// Handle OPTIONS requests
+	router.OPTIONS("/*any", func(c *gin.Context) {
+		c.AbortWithStatus(http.StatusNoContent)
 	})
 
-	r.Run("localhost:8080") // Порт для микросервиса User
-}
+	// Setup routes
+	routes.SetupRoutes(router)
 
-func CORSMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(204)
-			return
-		}
-
-		c.Next()
-	}
+	// Start server
+	router.Run(":8081")
 }

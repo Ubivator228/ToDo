@@ -7,12 +7,22 @@ import (
 )
 
 func SetupRoutes(r *gin.Engine) {
-	r.POST("/register", controllers.Register)
-	r.POST("/login", controllers.Login)
-
-	auth := r.Group("/")
-	auth.Use(middleware.AuthMiddleware())
+	// Auth routes
+	authGroup := r.Group("/auth")
 	{
-		auth.GET("/me", controllers.GetCurrentUser)
+		authGroup.POST("/register", controllers.Register)
+		authGroup.POST("/login", controllers.Login)
 	}
+
+	// Protected routes
+	protected := r.Group("/")
+	protected.Use(middleware.AuthMiddleware())
+	{
+		protected.GET("/me", controllers.GetCurrentUser)
+	}
+
+	// Health check
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{"status": "OK"})
+	})
 }

@@ -1,24 +1,20 @@
 version: "3.9"
 
 services:
-
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "3000:80"
-
+      - "3000:3000"
     environment:
       - VITE_API_URL=http://user-service:8081
+      - VITE_TODO_API=http://todo-service:8082
     depends_on:
       - user-service
       - todo-service
-    restart: always
-
-
-
-
+    networks:
+      - backend-network
 
   user-service:
     build:
@@ -32,11 +28,14 @@ services:
       - DB_PASSWORD=BULOCHNIK228
       - DB_NAME=todo
       - DB_PORT=5432
-      - JWT_SECRET=your_jwt_secret
+      - JWT_SECRET=your_jwt_secret_here
+    volumes:
+      - ./user-service/.env:/app/.env
     depends_on:
       postgres:
         condition: service_healthy
-    restart: always
+    networks:
+      - backend-network
 
   todo-service:
     build:
@@ -50,11 +49,14 @@ services:
       - DB_PASSWORD=BULOCHNIK228
       - DB_NAME=todo
       - DB_PORT=5432
-      - JWT_SECRET=your_jwt_secret
+      - JWT_SECRET=your_jwt_secret_here
+    volumes:
+      - ./todo-service/.env:/app/.env
     depends_on:
       postgres:
         condition: service_healthy
-    restart: always
+    networks:
+      - backend-network
 
   postgres:
     image: postgres:15
@@ -62,15 +64,19 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: BULOCHNIK228
       POSTGRES_DB: todo
-    ports:
-      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d todo"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
+    networks:
+      - backend-network
+
+networks:
+  backend-network:
+    driver: bridge
 
 volumes:
   pgdata:

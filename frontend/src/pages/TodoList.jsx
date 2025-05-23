@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getTodos, addTodo, deleteTodo, toggleTodo } from '../api/api';
+import { todoAPI } from '../api/api';
 import { getToken } from '../utils/token';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,7 +11,7 @@ const TodoList = () => {
     useEffect(() => {
         const fetchTodos = async () => {
             try {
-                const data = await getTodos();
+                const data = await todoAPI.getAll();
                 setTodos(data);
             } catch (err) {
                 navigate('/login');
@@ -27,20 +27,20 @@ const TodoList = () => {
 
     const handleAdd = async () => {
         if (!newTitle.trim()) return;
-        const added = await addTodo({ title: newTitle });
+        const added = await todoAPI.create(newTitle);
         setTodos([...todos, added]);
         setNewTitle('');
     };
 
     const handleToggle = async (id) => {
-        await toggleTodo(id);
+        await todoAPI.toggle(id);
         setTodos(todos.map(todo => (
             todo.id === id ? { ...todo, completed: !todo.completed } : todo
         )));
     };
 
     const handleDelete = async (id) => {
-        await deleteTodo(id);
+        await todoAPI.delete(id);
         setTodos(todos.filter(todo => todo.id !== id));
     };
 
@@ -68,12 +68,12 @@ const TodoList = () => {
                         key={todo.id}
                         className="flex justify-between items-center bg-white p-3 rounded shadow"
                     >
-            <span
-                className={`flex-1 cursor-pointer ${todo.completed ? 'line-through text-gray-500' : ''}`}
-                onClick={() => handleToggle(todo.id)}
-            >
-              {todo.title}
-            </span>
+                        <span
+                            className={`flex-1 cursor-pointer ${todo.completed ? 'line-through text-gray-500' : ''}`}
+                            onClick={() => handleToggle(todo.id)}
+                        >
+                            {todo.title}
+                        </span>
                         <button
                             onClick={() => handleDelete(todo.id)}
                             className="ml-4 text-red-500 hover:text-red-700"
