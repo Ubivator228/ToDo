@@ -3,9 +3,11 @@ package main
 import (
 	"ToDoProject/user-service/config"
 	"ToDoProject/user-service/database"
+	"ToDoProject/user-service/models"
 	"ToDoProject/user-service/routes"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"time"
 )
@@ -13,6 +15,11 @@ import (
 func main() {
 	config.LoadEnv()
 	database.ConnectDatabase()
+
+	err := database.DB.AutoMigrate(&models.User{})
+	if err != nil {
+		log.Fatalf("AutoMigrate failed: %v", err)
+	}
 
 	router := gin.Default()
 

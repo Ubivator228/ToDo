@@ -1,13 +1,12 @@
-FROM node:18-alpine
-
+# Stage 1: build
+FROM node:20 AS build
 WORKDIR /app
-COPY package*.json ./
-RUN npm install
 COPY . .
+RUN npm install && npm run build
 
-ENV NODE_ENV=production
-RUN npm run build
+# Stage 2: serve
+FROM node:20
+WORKDIR /app
+COPY --from=build /app/dist ./dist
 RUN npm install -g serve
-
-EXPOSE 5173
-CMD ["serve", "-s", "dist", "-l", "5173"]
+CMD ["serve", "-s", "dist"]

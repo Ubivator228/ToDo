@@ -1,36 +1,34 @@
-import React, { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { Toaster } from "react-hot-toast";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import TodoList from "./pages/TodoList";
-import { getToken } from "./utils/token";
+import React, { useState } from "react";
+import LoginForm from "../components/LoginForm";
+import RegisterForm from "../components/RegisterForm";
+import TodoPage from "../pages/TodoPage";
 
 export default function App() {
-    const [authenticated, setAuthenticated] = useState(!!getToken());
+    const [token, setToken] = useState(localStorage.getItem("token"));
+    const [showRegister, setShowRegister] = useState(false);
 
-    useEffect(() => {
-        setAuthenticated(!!getToken());
-    }, []);
+    const handleLogin = (token) => {
+        setToken(token);
+        localStorage.setItem("token", token);
+    };
 
-    return (
-        <Router>
-            <Toaster position="top-right" />
-            <Routes>
-                <Route path="/login" element={<Login setAuthenticated={setAuthenticated} />} />
-                <Route path="/register" element={<Register />} />
-                <Route
-                    path="/todos"
-                    element={authenticated ? <TodoList /> : <Navigate replace to="/login" />}
-                />
-                <Route
-                    path="/"
-                    element={
-                        authenticated ? <Navigate to="/todos" /> : <Navigate to="/register" />
-                    }
-                />
-                <Route path="*" element={<Navigate to="/" />} />
-            </Routes>
-        </Router>
-    );
+    if (!token) {
+        return (
+            <>
+                {showRegister ? (
+                    <>
+                        <RegisterForm onRegister={() => setShowRegister(false)} />
+                        <button onClick={() => setShowRegister(false)}>Уже есть аккаунт? Войти</button>
+                    </>
+                ) : (
+                    <>
+                        <LoginForm onLogin={handleLogin} />
+                        <button onClick={() => setShowRegister(true)}>Регистрация</button>
+                    </>
+                )}
+            </>
+        );
+    }
+
+    return <TodoPage token={token} />;
 }

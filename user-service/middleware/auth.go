@@ -38,6 +38,22 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		// Извлекаем user_id из claims и кладём в контекст
+		if claims, ok := token.Claims.(jwt.MapClaims); ok {
+			userIDFloat, ok := claims["user_id"].(float64) // jwt.MapClaims парсит числа как float64
+			if !ok {
+				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token claims"})
+				logRequest(c, requestID, http.StatusUnauthorized, start)
+				return
+			}
+			userID := uint(userIDFloat)
+			c.Set("userID", userID)
+		} else {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token claims"})
+			logRequest(c, requestID, http.StatusUnauthorized, start)
+			return
+		}
+
 		c.Next()
 		logRequest(c, requestID, c.Writer.Status(), start)
 	}
